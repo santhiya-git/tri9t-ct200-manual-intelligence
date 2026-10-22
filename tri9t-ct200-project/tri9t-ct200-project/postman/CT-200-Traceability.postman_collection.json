@@ -1,0 +1,25 @@
+{
+  "info": {
+    "name": "CT-200 Traceable QA API",
+    "description": "Use after starting the API. Ingest the two included PDFs with the local path available to the API process, then browse, select, generate, and retrieve stale status.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://127.0.0.1:8000"},
+    {"key": "nodeId", "value": "1"},
+    {"key": "selectionId", "value": "1"}
+  ],
+  "item": [
+    {"name": "Health", "request": {"method": "GET", "url": "{{baseUrl}}/health"}},
+    {"name": "Ingest v1 (adjust path if needed)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"file_path\": \"data/ct200_manual.pdf\",\n  \"document_key\": \"ct200\"\n}"}, "url": "{{baseUrl}}/documents/ingest"}},
+    {"name": "List versions", "request": {"method": "GET", "url": "{{baseUrl}}/documents/versions"}},
+    {"name": "Top-level sections v1", "request": {"method": "GET", "url": "{{baseUrl}}/sections?version=1"}},
+    {"name": "Search battery life v1", "request": {"method": "GET", "url": "{{baseUrl}}/search?q=measurement%20cycles&version=1"}},
+    {"name": "Get node", "request": {"method": "GET", "url": "{{baseUrl}}/nodes/{{nodeId}}"}},
+    {"name": "Create selection (replace nodeId)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"name\": \"Battery life QA\",\n  \"node_ids\": [{{nodeId}}]\n}"}, "url": "{{baseUrl}}/selections"}},
+    {"name": "Generate QA cases", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"selection_id\": {{selectionId}},\n  \"force_new\": false\n}"}, "url": "{{baseUrl}}/generations"}},
+    {"name": "Ingest v2 (adjust path if needed)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"file_path\": \"data/ct200_manual_v2.pdf\",\n  \"document_key\": \"ct200\"\n}"}, "url": "{{baseUrl}}/documents/ingest"}},
+    {"name": "Retrieve generation and stale status", "request": {"method": "GET", "url": "{{baseUrl}}/generations?selection_id={{selectionId}}"}},
+    {"name": "Diff node against latest", "request": {"method": "GET", "url": "{{baseUrl}}/nodes/{{nodeId}}/diff"}}
+  ]
+}
